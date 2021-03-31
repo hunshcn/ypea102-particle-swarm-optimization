@@ -69,9 +69,10 @@ empty_particle.Best.Cost = [];
 
 particle = repmat(empty_particle, nPop, 1);
 
+GlobalBest = struct;
 GlobalBest.Cost = inf;
 
-for i = 1:nPop
+parfor i = 1:nPop
     
     % Initialize Position
     particle(i).Position = unifrnd(VarMin, VarMax, VarSize);
@@ -85,14 +86,14 @@ for i = 1:nPop
     % Update Personal Best
     particle(i).Best.Position = particle(i).Position;
     particle(i).Best.Cost = particle(i).Cost;
-    
+end
+
+
+for i=1:nPop
     % Update Global Best
     if particle(i).Best.Cost<GlobalBest.Cost
-        
-        GlobalBest = particle(i).Best;
-        
+        GlobalBest=particle(i).Best;
     end
-    
 end
 
 BestCost = zeros(MaxIt, 1);
@@ -101,7 +102,7 @@ BestCost = zeros(MaxIt, 1);
 
 for it = 1:MaxIt
     
-    for i = 1:nPop
+    parfor i = 1:nPop
         
         % Update Velocity
         particle(i).Velocity = w*particle(i).Velocity ...
@@ -131,16 +132,13 @@ for it = 1:MaxIt
             
             particle(i).Best.Position = particle(i).Position;
             particle(i).Best.Cost = particle(i).Cost;
-            
-            % Update Global Best
-            if particle(i).Best.Cost<GlobalBest.Cost
-                
-                GlobalBest = particle(i).Best;
-                
-            end
-            
         end
-        
+    end
+    
+    for i=1:nPop
+        if particle(i).Best.Cost<GlobalBest.Cost
+            GlobalBest=particle(i).Best;
+        end
     end
     
     BestCost(it) = GlobalBest.Cost;
